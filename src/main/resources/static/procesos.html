@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitácora de Procesos — ICC Labcontrol</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='800' font-size='16'%3E%3Ctspan fill='%23F49300'%3EIC%3C/tspan%3E%3Ctspan fill='%234A4A4A'%3EC%3C/tspan%3E%3C/text%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+        colors: { icc: { 50:'#FFF8ED',100:'#FFEED4',200:'#FFD9A8',300:'#FFC170',400:'#FFA036',500:'#F49300',600:'#E58700',700:'#D57F00',800:'#A35F00',900:'#7A4700' } }
+      }}
+    }
+  </script>
+</head>
+<body class="bg-gray-50 font-sans text-[#4A4A4A] min-h-screen">
+
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-20">
+    <div class="w-full px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="text-xl font-extrabold tracking-tight">
+          <span class="text-[#F49300]">IC</span><span class="text-[#4A4A4A]">CUSCATLÁN</span>
+        </div>
+        <span class="text-[10px] font-semibold tracking-[0.15em] text-gray-400 hidden sm:inline">LABCONTROL</span>
+      </div>
+      <nav class="flex items-center gap-1 text-sm">
+        <a href="/" class="px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">Registrar</a>
+        <a href="/usuarios" class="px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">Usuarios</a>
+        <a href="/procesos" class="px-3 py-2 rounded-lg font-semibold text-[#F49300] bg-icc-50">Bitácora</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="w-full px-6 py-8">
+
+    <div class="mb-5">
+      <h1 class="text-2xl font-bold text-[#4A4A4A]">Bitácora de procesos</h1>
+      <p class="text-sm text-gray-500 mt-1">Registros de <code class="text-xs bg-gray-100 px-1 rounded">icc_labcontrol.procesos</code></p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white border border-gray-100 rounded-xl p-4 mb-5 flex flex-wrap gap-3 items-center">
+      <div class="flex-1 min-w-[260px] relative">
+        <i data-feather="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input id="q" type="text" placeholder="Buscar en comentarios, usuario, máquina, fechas..."
+               class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F49300] focus:border-transparent">
+      </div>
+      <select id="status" class="border border-gray-300 rounded-lg px-3 py-2 bg-white">
+        <option value="">Todos los estados</option>
+        <option value="1">En proceso</option>
+        <option value="2">Rechazado</option>
+        <option value="3">Terminado</option>
+      </select>
+      <select id="size" class="border border-gray-300 rounded-lg px-3 py-2 bg-white">
+        <option value="20">20 por página</option>
+        <option value="50">50 por página</option>
+        <option value="100">100 por página</option>
+      </select>
+    </div>
+
+    <!-- Tabla -->
+    <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 uppercase tracking-wide text-xs">
+            <tr>
+              <th class="text-left px-3 py-3">ID</th>
+              <th class="text-left px-3 py-3">Idin</th>
+              <th class="text-left px-3 py-3">Usuario</th>
+              <th class="text-left px-3 py-3">Máquina</th>
+              <th class="text-left px-3 py-3">Inicio</th>
+              <th class="text-left px-3 py-3">Fin</th>
+              <th class="text-left px-3 py-3">Comentario</th>
+              <th class="text-left px-3 py-3">Atendido</th>
+              <th class="text-left px-3 py-3">Estado</th>
+              <th class="text-right px-3 py-3">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbody" class="divide-y divide-gray-100">
+            <tr><td colspan="10" class="px-4 py-10 text-center text-gray-400">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50 text-sm">
+        <div id="meta" class="text-gray-500">—</div>
+        <div class="flex items-center gap-2">
+          <button id="prev" class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-white disabled:opacity-40" disabled>← Anterior</button>
+          <button id="next" class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-white disabled:opacity-40" disabled>Siguiente →</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal edición -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/40 z-30 flex items-start justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl my-8">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div>
+          <h2 class="text-lg font-bold">Editar proceso <span id="mId" class="text-icc-600"></span></h2>
+          <p class="text-xs text-gray-500">Modifica cualquier campo y guarda los cambios.</p>
+        </div>
+        <button id="mClose" class="p-2 hover:bg-gray-100 rounded-lg"><i data-feather="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="mAlert" class="hidden mx-6 mt-4 px-4 py-2 rounded-lg text-sm"></div>
+
+      <form id="mForm" class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">idin</label>
+          <input name="idin" type="number" class="inp">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">iduser</label>
+          <input name="iduser" type="number" class="inp">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">status</label>
+          <select name="status" class="inp">
+            <option value="1">1 · En proceso</option>
+            <option value="2">2 · Rechazado</option>
+            <option value="3">3 · Terminado</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">idpc (máquina)</label>
+          <input name="idpc" type="number" class="inp">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">hora (inicio)</label>
+          <input name="hora" type="text" maxlength="60" class="inp" placeholder="11-06-2019 (2:06:51 pm)">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">horafin</label>
+          <input name="horafin" type="text" maxlength="60" class="inp" placeholder="11-06-2019 (4:15:10 pm)">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">comentario</label>
+          <textarea name="comentario" rows="2" maxlength="250" class="inp"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">atendido (iduser)</label>
+          <input name="atendido" type="number" class="inp">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">fechas</label>
+          <input name="fechas" type="text" maxlength="100" class="inp">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">comfin</label>
+          <textarea name="comfin" rows="2" maxlength="250" class="inp"></textarea>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">comre</label>
+          <textarea name="comre" rows="2" maxlength="250" class="inp"></textarea>
+        </div>
+      </form>
+
+      <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+        <button id="mCancel" class="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">Cancelar</button>
+        <button id="mSave" class="inline-flex items-center gap-2 px-5 py-2 bg-icc-500 hover:bg-icc-600 text-white rounded-lg text-sm font-semibold">
+          <i data-feather="save" class="w-4 h-4"></i><span>Guardar cambios</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<style>
+  .inp { width:100%; border:1px solid #d1d5db; border-radius:0.5rem; padding:0.5rem 0.75rem; font-size:0.875rem; background:#fff; }
+  .inp:focus { outline:none; border-color:transparent; box-shadow: 0 0 0 2px #F49300; }
+</style>
+
+<script>
+  feather.replace();
+
+  const $ = id => document.getElementById(id);
+  let page = 0, size = 20, status = '', debounce;
+  let currentId = null;
+
+  const STATUS = { 1: { label:'En proceso', cls:'bg-blue-50 text-blue-700' },
+                   2: { label:'Rechazado',  cls:'bg-red-50 text-red-700' },
+                   3: { label:'Terminado',  cls:'bg-green-50 text-green-700' } };
+
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  async function load() {
+    const q = $('q').value.trim();
+    const url = `/api/procesos?q=${encodeURIComponent(q)}&status=${status}&page=${page}&size=${size}`;
+    $('tbody').innerHTML = '<tr><td colspan="10" class="px-4 py-10 text-center text-gray-400">Cargando...</td></tr>';
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      render(data);
+    } catch (e) {
+      $('tbody').innerHTML = `<tr><td colspan="10" class="px-4 py-10 text-center text-red-500">Error: ${esc(e.message)}</td></tr>`;
+    }
+  }
+
+  function render(data) {
+    const rows = data.content || [];
+    if (rows.length === 0) {
+      $('tbody').innerHTML = '<tr><td colspan="10" class="px-4 py-10 text-center text-gray-400">Sin resultados.</td></tr>';
+    } else {
+      $('tbody').innerHTML = rows.map(p => {
+        const st = STATUS[p.status] || { label: 'Estado '+p.status, cls:'bg-gray-100 text-gray-600' };
+        return `
+          <tr class="hover:bg-gray-50 align-top">
+            <td class="px-3 py-3 text-gray-500">${p.id}</td>
+            <td class="px-3 py-3 font-mono text-gray-600">${p.idin ?? ''}</td>
+            <td class="px-3 py-3">${esc(p.usuario || ('#' + (p.iduser ?? '?')))}</td>
+            <td class="px-3 py-3">${esc(p.maquina || ('#' + (p.idpc ?? '?')))}</td>
+            <td class="px-3 py-3 text-gray-600 whitespace-nowrap">${esc(p.hora)}</td>
+            <td class="px-3 py-3 text-gray-600 whitespace-nowrap">${esc(p.horafin)}</td>
+            <td class="px-3 py-3 max-w-[240px] truncate" title="${esc(p.comentario)}">${esc(p.comentario)}</td>
+            <td class="px-3 py-3">${esc(p.atendidoUsuario || (p.atendido ? '#'+p.atendido : '—'))}</td>
+            <td class="px-3 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${st.cls}">${st.label}</span></td>
+            <td class="px-3 py-3 text-right">
+              <button data-id="${p.id}" class="btnEdit px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 text-xs font-semibold">Editar</button>
+            </td>
+          </tr>`;
+      }).join('');
+      document.querySelectorAll('.btnEdit').forEach(b => b.addEventListener('click', e => abrirEdit(+b.dataset.id)));
+    }
+    const totalPages = data.totalPages ?? 1;
+    const totalElements = data.totalElements ?? 0;
+    const number = data.page ?? page;
+    $('meta').textContent = `Página ${number + 1} de ${Math.max(totalPages,1)} · ${totalElements} registro${totalElements === 1 ? '' : 's'}`;
+    $('prev').disabled = number <= 0;
+    $('next').disabled = number >= totalPages - 1;
+  }
+
+  // ---- Modal ----
+  async function abrirEdit(id) {
+    currentId = id;
+    $('mAlert').classList.add('hidden');
+    try {
+      const res = await fetch(`/api/procesos/${id}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const p = await res.json();
+      $('mId').textContent = '#' + p.id;
+      const f = $('mForm');
+      f.idin.value        = p.idin ?? '';
+      f.iduser.value      = p.iduser ?? '';
+      f.status.value      = p.status ?? 1;
+      f.idpc.value        = p.idpc ?? '';
+      f.hora.value        = p.hora ?? '';
+      f.horafin.value     = p.horafin ?? '';
+      f.comentario.value  = p.comentario ?? '';
+      f.atendido.value    = p.atendido ?? '';
+      f.fechas.value      = p.fechas ?? '';
+      f.comfin.value      = p.comfin ?? '';
+      f.comre.value       = p.comre ?? '';
+      $('modal').classList.remove('hidden');
+      feather.replace();
+    } catch (e) {
+      alert('Error abriendo: ' + e.message);
+    }
+  }
+  function cerrarModal() { $('modal').classList.add('hidden'); currentId = null; }
+  $('mClose').addEventListener('click', cerrarModal);
+  $('mCancel').addEventListener('click', cerrarModal);
+  $('modal').addEventListener('click', e => { if (e.target.id === 'modal') cerrarModal(); });
+
+  $('mSave').addEventListener('click', async () => {
+    if (!currentId) return;
+    const f = $('mForm');
+    const payload = {
+      idin:       f.idin.value       === '' ? null : +f.idin.value,
+      iduser:     f.iduser.value     === '' ? null : +f.iduser.value,
+      status:     f.status.value     === '' ? null : +f.status.value,
+      idpc:       f.idpc.value       === '' ? null : +f.idpc.value,
+      hora:       f.hora.value,
+      horafin:    f.horafin.value,
+      comentario: f.comentario.value,
+      atendido:   f.atendido.value   === '' ? null : +f.atendido.value,
+      fechas:     f.fechas.value,
+      comfin:     f.comfin.value,
+      comre:      f.comre.value
+    };
+    const btn = $('mSave'); btn.disabled = true;
+    try {
+      const res = await fetch(`/api/procesos/${currentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        $('mAlert').className = 'mx-6 mt-4 px-4 py-2 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200';
+        $('mAlert').textContent = data.message || `Error ${res.status}`;
+        $('mAlert').classList.remove('hidden');
+        return;
+      }
+      cerrarModal();
+      load();
+    } catch (e) {
+      $('mAlert').className = 'mx-6 mt-4 px-4 py-2 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200';
+      $('mAlert').textContent = 'Error de red: ' + e.message;
+      $('mAlert').classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ---- Filtros ----
+  $('q').addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => { page = 0; load(); }, 300);
+  });
+  $('status').addEventListener('change', () => { status = $('status').value; page = 0; load(); });
+  $('size').addEventListener('change', () => { size = +$('size').value; page = 0; load(); });
+  $('prev').addEventListener('click', () => { if (page > 0) { page--; load(); } });
+  $('next').addEventListener('click', () => { page++; load(); });
+
+  load();
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario — ICC Labcontrol</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='800' font-size='16'%3E%3Ctspan fill='%23F49300'%3EIC%3C/tspan%3E%3Ctspan fill='%234A4A4A'%3EC%3C/tspan%3E%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        icc: {
+                            50: '#FFF8ED',
+                            100: '#FFEED4',
+                            200: '#FFD9A8',
+                            300: '#FFC170',
+                            400: '#FFA036',
+                            500: '#F49300',
+                            600: '#E58700',
+                            700: '#D57F00',
+                            800: '#A35F00',
+                            900: '#7A4700'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-[#4A4A4A] min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div class="w-full px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="text-xl font-extrabold tracking-tight">
+                    <span class="text-[#F49300]">IC</span><span class="text-[#4A4A4A]">CUSCATLÁN</span>
+                </div>
+                <span class="text-[10px] font-semibold tracking-[0.15em] text-gray-400 hidden sm:inline">LABCONTROL</span>
+            </div>
+            <nav class="flex items-center gap-1 text-sm">
+                <a href="/" class="px-3 py-2 rounded-lg font-semibold text-[#F49300] bg-icc-50">Registrar</a>
+                <a href="/usuarios" class="px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">Usuarios</a>
+                <a href="/procesos" class="px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">Bitácora</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Form -->
+    <main class="w-full px-6 py-10">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 max-w-3xl mx-auto">
+
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-[#4A4A4A]">Crear nuevo acceso</h1>
+                <p class="text-sm text-gray-500 mt-1">Ingresa el código del empleado para autocompletar sus datos.</p>
+            </div>
+
+            <!-- Alertas -->
+            <div id="alert" class="hidden mb-5 px-4 py-3 rounded-lg text-sm"></div>
+
+            <form id="formUsuario" class="space-y-5" autocomplete="off">
+
+                <!-- Código + lookup -->
+                <div>
+                    <label class="block text-sm font-semibold text-[#4A4A4A] mb-1">Código de empleado <span class="text-red-500">*</span></label>
+                    <div class="flex gap-2">
+                        <input id="codigo" name="codigo" type="number" required min="1" class="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F49300] focus:border-transparent" placeholder="Ej: 1001">
+                        <button type="button" id="btnBuscar" class="inline-flex items-center gap-1 px-4 py-2 bg-icc-500 hover:bg-icc-600 text-white rounded-lg text-sm font-semibold transition">
+              <i data-feather="search" class="w-4 h-4"></i>
+              <span>Buscar</span>
+            </button>
+                    </div>
+                    <p id="codigoHelp" class="text-xs text-gray-400 mt-1">Presiona Tab o el botón para buscar en admin_icc.empleados.</p>
+                </div>
+
+                <!-- Datos del empleado (solo lectura) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-500 mb-1">Nombres</label>
+                        <input id="nombres" type="text" readonly class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-500 mb-1">Apellidos</label>
+                        <input id="apellidos" type="text" readonly class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-600">
+                    </div>
+                </div>
+
+                <!-- Username -->
+                <div>
+                    <label class="block text-sm font-semibold text-[#4A4A4A] mb-1">Username <span class="text-red-500">*</span></label>
+                    <input id="username" name="username" type="text" required maxlength="80" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F49300] focus:border-transparent" placeholder="Se autocompleta con el nombre completo del empleado">
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-semibold text-[#4A4A4A] mb-1">Status <span class="text-red-500">*</span></label>
+                    <select id="status" name="status" required class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F49300] focus:border-transparent bg-white">
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+          </select>
+                </div>
+
+                <!-- Tipo (bitmask) -->
+                <div>
+                    <label class="block text-sm font-semibold text-[#4A4A4A] mb-2">Tipo de acceso <span class="text-red-500">*</span></label>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-icc-50">
+              <input id="tipoRealiza" type="checkbox" value="1" class="w-4 h-4 text-icc-500 rounded focus:ring-icc-500">
+              <span class="text-sm">Realiza <span class="text-xs text-gray-400">(1)</span></span>
+            </label>
+                        <label class="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-icc-50">
+              <input id="tipoRecibe" type="checkbox" value="2" class="w-4 h-4 text-icc-500 rounded focus:ring-icc-500">
+              <span class="text-sm">Recibe <span class="text-xs text-gray-400">(2)</span></span>
+            </label>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Si marcas las dos opciones, se crearán dos registros (uno con tipo 1 y otro con tipo 2).</p>
+                </div>
+
+                <!-- Campos auto-llenados (read-only) -->
+                <div class="border-t border-gray-100 pt-5">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Se guardarán automáticamente</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-500 mb-1">usuarios</label>
+                            <input id="usuarios" type="text" readonly class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-600" placeholder="Nombre completo del empleado">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-500 mb-1">codigo2</label>
+                            <input id="codigo2" type="number" readonly class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-600" placeholder="Mismo código">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex items-center justify-end gap-3 pt-4">
+                    <button type="button" id="btnLimpiar" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
+            Limpiar
+          </button>
+                    <button type="submit" id="btnGuardar" class="inline-flex items-center gap-2 px-5 py-2 bg-icc-500 hover:bg-icc-600 text-white rounded-lg text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <i data-feather="save" class="w-4 h-4"></i>
+            <span>Guardar usuario</span>
+          </button>
+                </div>
+            </form>
+        </div>
+
+        <p class="text-center text-xs text-gray-400 mt-6">
+            icc_labcontrol.usuario · ICCuscatlán
+        </p>
+    </main>
+
+    <script>
+        feather.replace();
+
+        const $ = id => document.getElementById(id);
+        const alertBox = $('alert');
+
+        function showAlert(type, msg) {
+            const base = 'mb-5 px-4 py-3 rounded-lg text-sm';
+            const styles = {
+                ok: 'bg-green-50 text-green-700 border border-green-200',
+                err: 'bg-red-50 text-red-700 border border-red-200',
+                info: 'bg-icc-50 text-icc-700 border border-icc-200',
+                warn: 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+            };
+            alertBox.className = base + ' ' + (styles[type] || styles.info);
+            alertBox.textContent = msg;
+            alertBox.classList.remove('hidden');
+        }
+
+        function hideAlert() {
+            alertBox.classList.add('hidden');
+        }
+
+        // --- Buscar empleado ---
+        async function buscarEmpleado() {
+            const codigo = $('codigo').value.trim();
+            if (!codigo) {
+                showAlert('warn', 'Ingresa un código primero.');
+                return;
+            }
+            hideAlert();
+            try {
+                const res = await fetch(`/api/empleados/${encodeURIComponent(codigo)}`);
+                if (res.status === 404) {
+                    limpiarDatosEmpleado();
+                    showAlert('err', 'No existe ningún empleado con ese código.');
+                    return;
+                }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const emp = await res.json();
+                $('nombres').value = emp.nombres || '';
+                $('apellidos').value = emp.apellidos || '';
+                const nombreCompleto = ((emp.nombres || '') + ' ' + (emp.apellidos || '')).trim();
+                $('usuarios').value = nombreCompleto;
+                $('codigo2').value = emp.codigo;
+                // username = nombre completo (columna VARCHAR(80), truncamos si hace falta)
+                $('username').value = nombreCompleto.substring(0, 80);
+                showAlert('ok', `Empleado encontrado: ${nombreCompleto}`);
+            } catch (e) {
+                limpiarDatosEmpleado();
+                showAlert('err', 'Error consultando el empleado: ' + e.message);
+            }
+        }
+
+        function limpiarDatosEmpleado() {
+            $('nombres').value = '';
+            $('apellidos').value = '';
+            $('usuarios').value = '';
+            $('codigo2').value = '';
+        }
+
+        $('btnBuscar').addEventListener('click', buscarEmpleado);
+        $('codigo').addEventListener('blur', () => {
+            if ($('codigo').value.trim()) buscarEmpleado();
+        });
+        $('codigo').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarEmpleado();
+            }
+        });
+
+        // --- Limpiar ---
+        $('btnLimpiar').addEventListener('click', () => {
+            $('formUsuario').reset();
+            limpiarDatosEmpleado();
+            $('tipoRealiza').checked = false;
+            $('tipoRecibe').checked = false;
+            hideAlert();
+        });
+
+        // --- Guardar ---
+        $('formUsuario').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const codigo = parseInt($('codigo').value, 10);
+            const username = $('username').value.trim();
+            const status = parseInt($('status').value, 10);
+            const realiza = $('tipoRealiza').checked ? 1 : 0;
+            const recibe  = $('tipoRecibe').checked ? 2 : 0;
+            const tipo = realiza + recibe;
+
+            if (!codigo) return showAlert('err', 'El código es obligatorio.');
+            if (!username) return showAlert('err', 'El username es obligatorio.');
+            if (!$('nombres').value) return showAlert('err', 'Primero busca un empleado válido.');
+            if (tipo < 1) return showAlert('err', 'Selecciona al menos un tipo de acceso (Realiza o Recibe).');
+
+            const btn = $('btnGuardar');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Guardando...</span>';
+
+            try {
+                const res = await fetch('/api/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo, username, status, tipo })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    showAlert('err', data.message || `Error ${res.status}`);
+                    return;
+                }
+                // Nueva respuesta: { creados: [...], omitidos: [...], message: "..." }
+                const creadosCount = (data.creados || []).length;
+                const omitidos = data.omitidos || [];
+                let msg = data.message || `Se crearon ${creadosCount} registro(s).`;
+                if (omitidos.length > 0) {
+                    const nombres = omitidos.map(t => t === 1 ? 'Realiza' : t === 2 ? 'Recibe' : ('tipo ' + t));
+                    msg += ` Ya existía: ${nombres.join(', ')}.`;
+                }
+                showAlert('ok', msg);
+                $('formUsuario').reset();
+                limpiarDatosEmpleado();
+            } catch (err) {
+                showAlert('err', 'Error de red: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-feather="save" class="w-4 h-4"></i><span>Guardar usuario</span>';
+                feather.replace();
+            }
+        });
+    </script>
+</body>
+</html>
