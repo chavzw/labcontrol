@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/feather-icons"></script>
+  <script src="/js/ui.js" defer></script>
   <script>
     tailwind.config = {
       theme: { extend: {
@@ -106,8 +107,6 @@
         </div>
         <button id="mClose" class="p-2 hover:bg-gray-100 rounded-lg"><i data-feather="x" class="w-5 h-5"></i></button>
       </div>
-
-      <div id="mAlert" class="hidden mx-6 mt-4 px-4 py-2 rounded-lg text-sm"></div>
 
       <form id="mForm" class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -237,7 +236,6 @@
   // ---- Modal ----
   async function abrirEdit(id) {
     currentId = id;
-    $('mAlert').classList.add('hidden');
     try {
       const res = await fetch(`/api/procesos/${id}`);
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -258,7 +256,7 @@
       $('modal').classList.remove('hidden');
       feather.replace();
     } catch (e) {
-      alert('Error abriendo: ' + e.message);
+      toast('Error abriendo: ' + e.message, 'error');
     }
   }
   function cerrarModal() { $('modal').classList.add('hidden'); currentId = null; }
@@ -291,17 +289,14 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        $('mAlert').className = 'mx-6 mt-4 px-4 py-2 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200';
-        $('mAlert').textContent = data.message || `Error ${res.status}`;
-        $('mAlert').classList.remove('hidden');
+        toast(data.message || `Error ${res.status}`, 'error');
         return;
       }
       cerrarModal();
+      toast('Proceso actualizado.', 'success');
       load();
     } catch (e) {
-      $('mAlert').className = 'mx-6 mt-4 px-4 py-2 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200';
-      $('mAlert').textContent = 'Error de red: ' + e.message;
-      $('mAlert').classList.remove('hidden');
+      toast('Error de red: ' + e.message, 'error');
     } finally {
       btn.disabled = false;
     }

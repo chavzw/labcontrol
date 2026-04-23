@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/js/ui.js" defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -63,9 +64,6 @@
                 <h1 class="text-2xl font-bold text-[#4A4A4A]">Crear nuevo acceso</h1>
                 <p class="text-sm text-gray-500 mt-1">Ingresa el código del empleado para autocompletar sus datos.</p>
             </div>
-
-            <!-- Alertas -->
-            <div id="alert" class="hidden mb-5 px-4 py-3 rounded-lg text-sm"></div>
 
             <form id="formUsuario" class="space-y-5" autocomplete="off">
 
@@ -162,24 +160,13 @@
         feather.replace();
 
         const $ = id => document.getElementById(id);
-        const alertBox = $('alert');
 
+        // Adaptador: mapea los tipos del formulario a los tipos de toast globales.
+        const TOAST_TYPE = { ok: 'success', err: 'error', info: 'info', warn: 'warning' };
         function showAlert(type, msg) {
-            const base = 'mb-5 px-4 py-3 rounded-lg text-sm';
-            const styles = {
-                ok: 'bg-green-50 text-green-700 border border-green-200',
-                err: 'bg-red-50 text-red-700 border border-red-200',
-                info: 'bg-icc-50 text-icc-700 border border-icc-200',
-                warn: 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-            };
-            alertBox.className = base + ' ' + (styles[type] || styles.info);
-            alertBox.textContent = msg;
-            alertBox.classList.remove('hidden');
+            toast(msg, TOAST_TYPE[type] || 'info');
         }
-
-        function hideAlert() {
-            alertBox.classList.add('hidden');
-        }
+        function hideAlert() { /* no-op: los toasts se autocierran */ }
 
         // --- Buscar empleado ---
         async function buscarEmpleado() {

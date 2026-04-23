@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/feather-icons"></script>
+  <script src="/js/ui.js" defer></script>
   <script>
     tailwind.config = {
       theme: { extend: {
@@ -237,18 +238,28 @@
     $('next').disabled = number >= totalPages - 1;
   }
 
+  // ---- Eliminar usuario (usa confirmDialog + toast de ui.js) ----
   async function eliminar(codigo, nombre) {
-    if (!confirm(`¿Eliminar el usuario "${nombre}" (código ${codigo})?\n\nSi existe en más de una fila, se borrarán todas.`)) return;
+    const ok = await confirmDialog({
+      title: 'Eliminar usuario',
+      message: `¿Seguro que deseas eliminar a "${nombre}" (código ${codigo})?`,
+      detail: 'Si el usuario existe en más de una fila (Realiza + Recibe), se borrarán todas. Esta acción no se puede deshacer.',
+      confirmText: 'Sí, eliminar',
+      variant: 'danger'
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/usuarios/codigo/${codigo}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert('Error: ' + (data.message || res.status));
+        toast('Error: ' + (data.message || res.status), 'error');
         return;
       }
+      const filas = data.deleted ? ` (${data.deleted} fila${data.deleted === 1 ? '' : 's'})` : '';
+      toast(`Usuario "${nombre}" eliminado${filas}.`, 'success');
       load();
     } catch (e) {
-      alert('Error de red: ' + e.message);
+      toast('Error de red: ' + e.message, 'error');
     }
   }
 
@@ -271,7 +282,7 @@
       const res = await fetch(`/api/usuarios/codigo/${codigo}`);
       const data = await res.json();
       if (!res.ok) {
-        alert('Error: ' + (data.message || res.status));
+        toast('Error: ' + (data.message || res.status), 'error');
         return;
       }
       $('editCodigo').value = data.codigo;
@@ -284,7 +295,7 @@
       $('editTipoRecibe').checked = (t & 2) !== 0;
       abrirModal();
     } catch (e) {
-      alert('Error de red: ' + e.message);
+      toast('Error de red: ' + e.message, 'error');
     }
   }
 
